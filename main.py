@@ -94,4 +94,4 @@ async def get_chat(chat_id: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="localhost", port=4500, reload=True)
+    uvicorn.run("main:app", host="localhost", port=3791, reload=True)

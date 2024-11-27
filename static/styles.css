@@ -91,8 +91,7 @@ body {
 }
 
 .sidebar-close,
-.new-chat-button,
-.sidebar-toggle {
+.new-chat-button {
     width: 40px;
     height: 40px;
     border: none;
@@ -107,13 +106,36 @@ body {
 }
 
 .sidebar-close:hover,
-.new-chat-button:hover,
+.new-chat-button:hover {
+    background-color: var(--input-bg);
+}
+
+.sidebar-close i {
+    font-size: 1.5rem;
+}
+
+.new-chat-button i {
+    font-size: 1.5rem;
+}
+
+.sidebar-toggle {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: var(--text-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-speed);
+}
+
 .sidebar-toggle:hover {
     background-color: var(--input-bg);
 }
 
-.sidebar-close i,
-.new-chat-button i,
 .sidebar-toggle i {
     font-size: 1.25rem;
 }
