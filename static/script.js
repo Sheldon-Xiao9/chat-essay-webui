@@ -15,11 +15,18 @@ const sidebarClose = document.querySelector('.sidebar-close');
 const homeButton = document.querySelector('.home-button');
 const newChatButton = document.querySelector('.new-chat-button');
 
+// 全局变量
+let currentChatId = null;
+
 document.addEventListener('DOMContentLoaded', function() {
     // 侧边栏切换
     sidebarToggle.addEventListener('click', () => {
         sidebar.classList.toggle('open');
         mainContent.classList.toggle('sidebar-open');
+
+        if (sidebar.classList.contains('open')) {
+            loadChatHistory();
+        } 
     });
 
     // 主题切换
@@ -35,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function switchToChatMode() {
         welcomeContainer.classList.add('hidden');
         setTimeout(() => {
+            chatInputContainer.classList.remove('hidden');
             chatInputContainer.classList.add('visible');
             messagesContainer.classList.remove('hidden');
             messagesContainer.classList.add('visible');
@@ -117,6 +125,108 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 滚动到最新消息
         messagesContainer.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+        // 保存聊天记录（无论是用户消息还是助手消息）
+        await saveCurrentChat();
+    }
+
+    // 保存当前聊天记录
+    async function saveCurrentChat() {
+        const messages = [];
+        messagesContainer.querySelectorAll('.message').forEach(msgEl => {
+            messages.push({
+                role: msgEl.classList.contains('user') ? 'user' : 'assistant',
+                content: msgEl.querySelector('.message-content').textContent
+            });
+        });
+        
+        if (messages.length === 0) return;
+        
+        const firstUserMessage = messages.find(msg => msg.role === 'user')?.content || '新对话';
+        const title = firstUserMessage.length > 20 ? firstUserMessage.substring(0, 20) + '...' : firstUserMessage;
+        
+        try {
+            const response = await fetch('/save_chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: currentChatId,
+                    messages: messages,
+                    title: title
+                })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                currentChatId = data.chat_id;
+                await loadChatHistory(); // 刷新历史记录
+            }
+        } catch (error) {
+            console.error('Error saving chat:', error);
+        }
+    }
+
+    // 加载聊天历史
+    async function loadChatHistory() {
+        try {
+            const response = await fetch('/get_chat_history');
+            const history = await response.json();
+            
+            const historyContainer = document.querySelector('.chat-history');
+            historyContainer.innerHTML = '';
+            
+            history.forEach(chat => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'chat-history-item';
+                historyItem.setAttribute('data-chat-id', chat.id);
+                historyItem.innerHTML = `
+                    <i class="ri-chat-history-line"></i>
+                    <span>${chat.title}</span>
+                `;
+                historyItem.addEventListener('click', () => loadChat(chat.id));
+                historyContainer.appendChild(historyItem);
+            });
+        } catch (error) {
+            console.error('Error loading chat history:', error);
+        }
+    }
+
+    // 加载特定的聊天记录
+    async function loadChat(chatId) {
+        try {
+            const response = await fetch(`/get_chat/${chatId}`);
+            const chatData = await response.json();
+            
+            if (chatData.error) {
+                console.error('Error loading chat:', chatData.error);
+                return;
+            }
+            
+            // 切换到聊天模式
+            switchToChatMode();
+            
+            // 清空当前消息
+            messagesContainer.innerHTML = '';
+            
+            // 加载消息
+            for (const msg of chatData.messages) {
+                const messageElement = createMessageElement(msg.content, msg.role === 'user');
+                messagesContainer.appendChild(messageElement);
+            }
+            
+            // 更新当前聊天ID
+            currentChatId = chatId;
+            
+            // 在移动端自动关闭侧边栏
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('open');
+                mainContent.classList.remove('sidebar-open');
+            }
+        } catch (error) {
+            console.error('Error loading chat:', error);
+        }
     }
 
     // 处理文件上传
@@ -163,12 +273,6 @@ document.addEventListener('DOMContentLoaded', function() {
         await addMessage(message, true);
         input.value = '';
 
-        // 如果是第一条消息，添加到历史记录
-        if (messagesContainer.children.length === 1) {
-            const title = message.length > 20 ? message.substring(0, 20) + '...' : message;
-            addHistoryItem(title);
-        }
-
         // 模拟助手回复
         await addMessage('我已经收到你的问题，让我思考一下...');
     }
@@ -189,20 +293,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 添加历史记录项
-    function addHistoryItem(title) {
-        const historyContainer = document.querySelector('.chat-history');
-        const historyItem = document.createElement('div');
-        historyItem.className = 'chat-history-item';
-        historyItem.innerHTML = `
-            <i class="ri-chat-history-line"></i>
-            <span>${title}</span>
-        `;
-        historyContainer.prepend(historyItem);
-    }
-
     // 重置UI到初始状态的函数
     function resetToInitialState() {
+        // 重置当前聊天ID
+        currentChatId = null;
+        
         // 获取所有需要操作的元素
         const welcomeContainer = document.getElementById('welcome-container');
         const messages = document.getElementById('messages');
@@ -214,6 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 隐藏消息区域和底部输入框
         messages.classList.add('hidden');
+        messages.classList.remove('visible');
         chatInputContainer.classList.remove('visible');
         chatInputContainer.classList.add('hidden');
         if (chatBottom) {
