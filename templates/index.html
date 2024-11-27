@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat-Essay：你的论文处理助手</title>
+    <link href="{{ url_for('static', path='styles.css') }}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+</head>
+<body class="light-mode">
+    <!-- 侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="sidebar-close">
+                <i class="ri-close-line"></i>
+            </button>
+            <button class="new-chat-button" title="新的会话">
+                <i class="ri-add-line"></i>
+            </button>
+        </div>
+        <div class="sidebar-content">
+            <div class="sidebar-buttons">
+                <button class="sidebar-action-btn">
+                    <i class="ri-file-text-line"></i>
+                    帮你写摘要...
+                </button>
+                <button class="sidebar-action-btn">
+                    <i class="ri-book-read-line"></i>
+                    带你读论文...
+                </button>
+                <button class="sidebar-action-btn">
+                    <i class="ri-search-line"></i>
+                    给你推文献...
+                </button>
+                <button class="sidebar-action-btn">
+                    <i class="ri-chat-3-line"></i>
+                    自定义聊天
+                </button>
+            </div>
+            <div class="sidebar-divider">
+                <div class="divider-line"></div>
+                <span class="history-label">历史聊天记录</span>
+            </div>
+            <div class="chat-history">
+                <!-- 历史记录将在这里动态添加 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="main-content">
+        <!-- 顶部栏 -->
+        <header class="header">
+            <div class="header-left">
+                <button id="sidebar-toggle" class="sidebar-toggle">
+                    <i class="ri-menu-line"></i>
+                </button>
+                <div class="brand">
+                    <img src="{{ url_for('static', path='images/logo.svg') }}" alt="Logo" class="logo">
+                    <h1 class="title">Chat-Essay</h1>
+                </div>
+            </div>
+            <div class="header-right">
+                <button id="theme-toggle" class="theme-toggle">
+                    <i class="ri-sun-line" id="theme-icon"></i>
+                </button>
+                <div class="user-avatar">
+                    <img src="{{ url_for('static', path='images/avatar.svg') }}" alt="用户头像">
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要内容 -->
+        <main class="content">
+            <div class="center-container">
+                <div class="chat-area">
+                    <div id="welcome-container" class="welcome-container">
+                        <h2 class="welcome-text">今天你看文献了吗？</h2>
+                        <div id="initial-input" class="chat-input-container">
+                            <div class="input-wrapper">
+                                <label for="file-upload" class="file-upload-btn" title="上传文件">
+                                    <i class="ri-upload-2-line"></i>
+                                    <input type="file" id="file-upload" accept=".pdf,.doc,.docx" hidden>
+                                </label>
+                                <input type="text" class="chat-input" placeholder="输入问题或上传文献...">
+                                <button class="send-button">
+                                    <i class="ri-send-plane-fill"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="messages" class="messages hidden">
+                        <!-- 消息将在这里动态添加 -->
+                    </div>
+                </div>
+            </div>
+            <div id="chat-input-container" class="chat-input-container hidden">
+                <div class="input-wrapper">
+                    <label for="file-upload-bottom" class="file-upload-btn" title="上传文件">
+                        <i class="ri-upload-2-line"></i>
+                        <input type="file" id="file-upload-bottom" accept=".pdf,.doc,.docx" hidden>
+                    </label>
+                    <input type="text" class="chat-input" placeholder="输入问题或上传文献...">
+                    <button class="send-button">
+                        <i class="ri-send-plane-fill"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', path='script.js') }}"></script>
+</body>
+</html>
