@@ -102,5 +102,5 @@ chat-essay/
 ## 联系方式 📧
 
 如有问题或建议，欢迎联系：
-- 项目主页：[GitHub Repository URL]
-- 电子邮件：[Your Email]
+- 项目主页：[chat-essay-webui](https://github.com/Sheldon-Xiao9/chat-essay-webui)
+- 电子邮件：[Sheldon Xiao](mailto:sheldonhomes9@hotmail.com)
