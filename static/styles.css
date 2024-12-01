@@ -5,8 +5,12 @@
     --sidebar-bg: #ffffff;
     --border-color: #e0e0e0;
     --header-bg: #ffffff;
-    --border-radius: 12px;
+    --border-radius: 20px;
     --transition-speed: 0.3s;
+    --nav-button-bg: #f5f5f5;
+    --nav-button-hover: rgba(0, 0, 0, 0.1);
+    --nav-button-active: #555;
+    --nav-button-active-text: #fff;
     --input-bg: #f5f5f5;
     --input-text: #333;
     --input-placeholder: #888;
@@ -24,6 +28,10 @@
     --sidebar-bg: #1a1a1a;
     --border-color: #404040;
     --header-bg: #1a1a1a;
+    --nav-button-bg: #888;
+    --nav-button-hover: rgba(255, 255, 255, 0.1);
+    --nav-button-active: #fff;
+    --nav-button-active-text: #333;
     --input-bg: #2d2d2d;
     --input-text: #e4e4e4;
     --input-placeholder: #888;
@@ -381,7 +389,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2rem;
+    gap: 1.25rem;
     transition: opacity var(--transition-speed), transform var(--transition-speed);
 }
 
@@ -396,6 +404,99 @@ body {
     font-weight: bold;
     color: var(--text-color);
     white-space: nowrap;
+    margin-bottom: 2rem;
+}
+
+.welcome-nav {
+    display: flex;
+    gap: 0;
+    justify-content: flex-start;
+    margin: 0;
+    background-color: var(--bg-color);
+    border: 1px solid var(--input-bg);
+    border-radius: 20px;
+    padding: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.nav-slider {
+    position: absolute;
+    left: 6px;
+    top: 4px;
+    width: calc(25% - 12px);
+    height: calc(100% - 8px);
+    background-color: var(--nav-button-active);
+    border-radius: 16px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+}
+
+.nav-button-welcome {
+    -webkit-appearance: none;
+    background-color: transparent;
+    border: none;
+    color: var(--nav-button-bg);
+    padding: 8px 16px;
+    border-radius: 16px;
+    cursor: pointer;
+    /* transition: all 0.5s ease; */
+    flex: 1;
+    margin-left: 2px;
+    margin-right: 10px;
+    min-width: 80px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    z-index: 2;
+}
+
+.nav-button-welcome:hover {
+    background-color: var(--nav-button-hover);
+    transform: background-color 0.3s ease;
+}
+
+.nav-button-welcome i {
+    font-size: 18px;
+}
+
+.nav-button-welcome:nth-child(2) i {
+    color: #4a90e2;
+}
+
+.nav-button-welcome:nth-child(3) i {
+    color: #f5a623;
+}
+
+.nav-button-welcome:nth-child(4) i {
+    color: #7ed321;
+}
+
+.nav-button-welcome:nth-child(5) i {
+    color: #bd10e0;
+}
+
+.nav-button-welcome span {
+    font-style: normal;
+    color: var(--text-color);
+    font-size: 14px;
+    font-weight: normal;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    transition: color 0.3s ease;
+}
+
+.nav-button-welcome[data-active="true"] {
+    background-color: var(--nav-button-active);
+    color: var(--nav-button-active-text);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-button-welcome[data-active="true"] span {
+    color: var(--nav-button-active-text);
+    transition: color 0.3s ease;
 }
 
 .messages {
@@ -424,7 +525,6 @@ body {
     padding: 1rem;
     background-color: var(--bg-color);
     transition: all var(--transition-speed);
-    border-top: 1px solid var(--border-color);
     max-width: 1000px;
     width: 100%;
     margin: 0 auto;
@@ -440,7 +540,7 @@ body {
     align-items: center;
     gap: 0.5rem;
     background-color: var(--input-bg);
-    border-radius: var(--border-radius);
+    border-radius: 24px;
     padding: 0.5rem;
 }
 

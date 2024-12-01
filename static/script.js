@@ -19,6 +19,39 @@ const newChatButton = document.querySelector('.new-chat-button');
 let currentChatId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
+    const navButtons = document.querySelectorAll('.nav-button-welcome');
+    const navSlider = document.querySelector('.nav-slider');
+
+    // 移动滑块的函数
+    function moveSlider(index) {
+        const button = navButtons[index];
+        const buttonWidth = button.offsetWidth;
+        const buttonMarginLeft = 2;
+        const buttonMarginRight = 10;
+        const totalMargin = buttonMarginLeft + buttonMarginRight;
+        const offset = index * (buttonWidth + totalMargin);
+        navSlider.style.transform = `translateX(${offset}px)`;
+    }
+
+    // 切换按钮激活状态的函数
+    function setActiveButton(index) {
+        navButtons.forEach(btn => btn.removeAttribute('data-active'));
+        navButtons[index].setAttribute('data-active', 'true');
+        moveSlider(index);
+    }
+
+    // 默认激活第一个按钮
+    if (navButtons.length > 0) {
+        setActiveButton(0);
+    }
+
+    // 导航按钮点击事件
+    navButtons.forEach((button, index) => {
+        button.addEventListener('click', () => {
+            setActiveButton(index);
+        });
+    });
+
     // 侧边栏切换
     sidebarToggle.addEventListener('click', () => {
         sidebar.classList.toggle('open');
@@ -338,39 +371,54 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // 首页按钮点击事件
-    homeButton.addEventListener('click', function() {
-        // 隐藏聊天区域，显示欢迎界面
-        document.querySelector('.chat-area').style.display = 'none';
-        document.getElementById('welcome-container').style.display = 'flex';
+    // homeButton.addEventListener('click', function() {
+    //     // 隐藏聊天区域，显示欢迎界面
+    //     document.querySelector('.chat-area').style.display = 'none';
+    //     document.getElementById('welcome-container').style.display = 'flex';
         
-        // 清空聊天记录
-        document.getElementById('chat-messages').innerHTML = '';
+    //     // 清空聊天记录
+    //     document.getElementById('chat-messages').innerHTML = '';
         
-        // 关闭侧边栏
-        document.getElementById('sidebar').classList.remove('open');
-        document.querySelector('.main-content').classList.remove('sidebar-open');
+    //     // 关闭侧边栏
+    //     document.getElementById('sidebar').classList.remove('open');
+    //     document.querySelector('.main-content').classList.remove('sidebar-open');
         
-        // 重置输入框
-        document.querySelector('#initial-input .chat-input').value = '';
-        document.querySelector('.chat-input-container .input-wrapper .chat-input').value = '';
+    //     // 重置输入框
+    //     document.querySelector('#initial-input .chat-input').value = '';
+    //     document.querySelector('.chat-input-container .input-wrapper .chat-input').value = '';
         
-        // 隐藏底部输入框
-        document.querySelector('.chat-input-container').style.display = 'none';
-    });
+    //     // 隐藏底部输入框
+    //     document.querySelector('.chat-input-container').style.display = 'none';
+    // });
 
     // 侧边栏按钮点击事件
     document.querySelectorAll('.sidebar-action-btn').forEach(button => {
         button.addEventListener('click', () => {
-            const action = button.textContent.trim();
             // 清除欢迎界面，显示聊天界面
-            document.getElementById('welcome-container').classList.add('hidden');
-            document.getElementById('messages').classList.remove('hidden');
-            document.getElementById('chat-input-container').classList.remove('hidden');
+            resetToInitialState();
+
+            const action = button.querySelector('i').nextSibling.textContent.trim();
             
             // 添加到历史记录
-            addHistoryItem(action);
+            // addHistoryItem(action);
             
-            // 这里可以添加不同按钮的具体行为
+            // 根据不同的按钮设置对应的导航状态
+            switch (action) {
+                case '帮你写摘要...':
+                    setActiveButton(1);
+                    break;
+                case '带你读论文...':
+                    setActiveButton(2);
+                    break;
+                case '给你推文献...':
+                    setActiveButton(3);
+                    break;
+                case '自定义聊天':
+                    setActiveButton(0);
+                    break;
+                default:
+                    setActiveButton(0);
+            }
         });
     });
 });
