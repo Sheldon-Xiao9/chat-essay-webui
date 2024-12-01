@@ -433,7 +433,7 @@ body {
 }
 
 .nav-button-welcome {
-    -webkit-appearance: none;
+    appearance: none;
     background-color: transparent;
     border: none;
     color: var(--nav-button-bg);
