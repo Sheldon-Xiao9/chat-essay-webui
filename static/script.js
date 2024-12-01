@@ -38,6 +38,17 @@ document.addEventListener('DOMContentLoaded', function() {
         navButtons.forEach(btn => btn.removeAttribute('data-active'));
         navButtons[index].setAttribute('data-active', 'true');
         moveSlider(index);
+
+        // 切换输入界面
+        const chatInputWrapper = document.querySelector('.chat-input-wrapper');
+        
+        
+        // 根据不同的按钮显示不同的输入界面
+        if (index === 0 || index === 3) { // 开始聊天或推荐文献
+            chatInputWrapper.classList.remove('upload-mode');
+        } else { // 摘要生成或阅读论文
+            chatInputWrapper.classList.add('upload-mode');
+        }
     }
 
     // 默认激活第一个按钮

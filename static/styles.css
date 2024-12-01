@@ -9,6 +9,7 @@
     --transition-speed: 0.3s;
     --nav-button-bg: #f5f5f5;
     --nav-button-hover: rgba(0, 0, 0, 0.1);
+    --file-upload-hover: #f9f9f9;
     --nav-button-active: #555;
     --nav-button-active-text: #fff;
     --input-bg: #f5f5f5;
@@ -30,6 +31,7 @@
     --header-bg: #1a1a1a;
     --nav-button-bg: #888;
     --nav-button-hover: rgba(255, 255, 255, 0.1);
+    --file-upload-hover: #666;
     --nav-button-active: #fff;
     --nav-button-active-text: #333;
     --input-bg: #2d2d2d;
@@ -491,12 +493,12 @@ body {
     background-color: var(--nav-button-active);
     color: var(--nav-button-active-text);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.6s ease;
 }
 
 .nav-button-welcome[data-active="true"] span {
     color: var(--nav-button-active-text);
-    transition: color 0.3s ease;
+    transition: color var(--transition-speed);
 }
 
 .messages {
@@ -544,7 +546,23 @@ body {
     padding: 0.5rem;
 }
 
+.chat-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--input-bg);
+    border-radius: 24px;
+    padding: 0.5rem;
+    width: 600px;
+    max-width: 90vw;
+}
+
 .welcome-container .input-wrapper {
+    width: 600px;
+    max-width: 90vw;
+}
+
+.welcome-container .chat-input-wrapper {
     width: 600px;
     max-width: 90vw;
 }
@@ -559,6 +577,17 @@ body {
     transition: background-color 0.2s;
 }
 
+.chat-input-wrapper .file-upload-btn {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 36px;
+    overflow: hidden;
+}
+
 .file-upload-btn:hover {
     background-color: rgba(0, 0, 0, 0.1);
 }
@@ -566,6 +595,95 @@ body {
 .file-upload-btn i {
     font-size: 1.2rem;
     color: var(--text-color);
+}
+
+.chat-input-wrapper .file-upload-btn i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--text-color);
+    flex-shrink: 0;
+}
+
+.chat-input-wrapper .file-upload-btn .upload-text {
+    font-size: 14px;
+    color: var(--text-color);
+    margin-left: 8px;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    overflow: hidden;
+    display: none;
+}
+
+.chat-input-wrapper .chat-input {
+    flex: 1;
+    border: none;
+    background: none;
+    padding: 0.5rem;
+    color: var(--text-color);
+    font-size: 14px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: auto;
+}
+
+.chat-input-wrapper .send-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    visibility: visible;
+}
+
+.chat-input-wrapper .send-button:hover {
+    background-color: var(--nav-button-hover);
+}
+
+.chat-input-wrapper .send-button i {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+/* 上传模式样式 */
+.chat-input-wrapper.upload-mode .file-upload-btn {
+    flex: 1;
+    background: var(--nav-button-hover);
+}
+
+.chat-input-wrapper.upload-mode .file-upload-btn:hover {
+    background-color: var(--file-upload-hover);
+}
+
+.chat-input-wrapper.upload-mode .file-upload-btn .upload-text {
+    opacity: 1;
+    max-width: 200px;
+    display: flex;
+    transform: translateX(0);
+}
+
+.chat-input-wrapper.upload-mode .chat-input {
+    display: none;
+    transform: translateX(-20px);
+    width: 0;
+    padding: 0;
+    opacity: 0;
+}
+
+.chat-input-wrapper.upload-mode .send-button {
+    transform: scale(0);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    visibility: hidden;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    padding: 0;
 }
 
 .chat-input {
@@ -601,32 +719,6 @@ body {
 .send-button i {
     font-size: 1.2rem;
     color: var(--primary-color);
-}
-
-/* 上传按钮样式 */
-.upload-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 1rem 2rem;
-    background-color: var(--primary-color);
-    color: white;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.upload-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
-}
-
-.upload-button i {
-    font-size: 1.2rem;
-}
-
-[data-theme="dark"] .invertible-image {
-    filter: invert(1);
 }
 
 /* 加载动画 */
