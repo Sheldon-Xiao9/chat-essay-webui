@@ -9,7 +9,7 @@
     --transition-speed: 0.3s;
     --nav-button-bg: #f5f5f5;
     --nav-button-hover: rgba(0, 0, 0, 0.1);
-    --file-upload-hover: #f9f9f9;
+    --file-upload-hover: #f8f8f8;
     --nav-button-active: #555;
     --nav-button-active-text: #fff;
     --input-bg: #f5f5f5;
@@ -815,4 +815,17 @@ body {
     background-color: var(--message-bg-assistant);
     color: var(--message-text-assistant);
     border-bottom-left-radius: 4px;
+}
+
+.disclaimer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+    opacity: 0.6;
+    font-size: 10px;
+    text-align: center;
+    padding: 0 0.5rem 0.5rem 0.5rem;
+    background-color: var(--bg-color);
+    z-index: 10;
 }
