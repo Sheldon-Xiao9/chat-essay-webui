@@ -250,6 +250,28 @@ body {
     text-overflow: ellipsis;
 }
 
+.chat-history-item .delete-button {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--icon-color);
+    font-size: 0.7rem;
+    padding: 0.05rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: all 0.3s ease-in-out;
+}
+
+.chat-history-item:hover .delete-button {
+    display: flex;
+}
+
+.chat-history-item .delete-button:hover {
+    opacity: 1;
+}
+
 .chat-time {
     font-size: 0.8em;
     color: #888;

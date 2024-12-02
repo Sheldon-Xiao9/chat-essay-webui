@@ -92,6 +92,24 @@ async def get_chat(chat_id: str):
             "error": str(e)
         })
 
+@app.delete("/delete_chat/{chat_id}")
+async def delete_chat(chat_id: str):
+    try:
+        chat_file = os.path.join(CHAT_HISTORY_DIR, f"{chat_id}.json")
+        if not os.path.exists(chat_file):
+            return JSONResponse({
+                "error": "Chat not found"
+            })
+
+        os.remove(chat_file)
+        return JSONResponse({
+            "success": True
+        })
+    except Exception as e:
+        return JSONResponse({
+            "error": str(e)
+        })
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="localhost", port=3791, reload=True)

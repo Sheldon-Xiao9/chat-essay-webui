@@ -225,11 +225,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 const historyItem = document.createElement('div');
                 historyItem.className = 'chat-history-item';
                 historyItem.setAttribute('data-chat-id', chat.id);
-                historyItem.innerHTML = `
-                    <i class="ri-chat-history-line"></i>
-                    <span>${chat.title}</span>
-                `;
+                
+                const icon = document.createElement('i');
+                icon.className = 'ri-chat-history-line';
+                
+                const span = document.createElement('span');
+                span.textContent = chat.title;
+                
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'delete-button';
+                deleteButton.title = '删除';
+                deleteButton.innerHTML = '<i class="ri-delete-bin-5-line"></i>';
+                
+                // 为删除按钮添加点击事件
+                deleteButton.addEventListener('click', async (e) => {
+                    e.stopPropagation(); // 阻止事件冒泡
+                    await deleteChat(chat.id);
+                });
+                
+                // 为历史记录项添加点击事件
                 historyItem.addEventListener('click', () => loadChat(chat.id));
+                
+                historyItem.appendChild(icon);
+                historyItem.appendChild(span);
+                historyItem.appendChild(deleteButton);
                 historyContainer.appendChild(historyItem);
             });
         } catch (error) {
@@ -270,6 +289,27 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Error loading chat:', error);
+        }
+    }
+
+    // 删除特定的聊天记录
+    async function deleteChat(chatId) {
+        try {
+            const response = await fetch(`/delete_chat/${chatId}`, {
+                method: 'DELETE'
+            });
+            
+            const data = await response.json();
+            if (!response.ok) {
+                console.error('Failed to delete chat:', data.error);
+            }
+            
+            // 无论删除是否成功，都刷新历史记录
+            await loadChatHistory();
+        } catch (error) {
+            console.error('Error deleting chat:', error);
+            // 即使发生错误也尝试刷新历史记录
+            await loadChatHistory();
         }
     }
 
