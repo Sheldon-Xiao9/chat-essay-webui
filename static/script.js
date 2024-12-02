@@ -421,27 +421,6 @@ document.addEventListener('DOMContentLoaded', function() {
         mainContent.classList.remove('sidebar-open');
     });
 
-    // 首页按钮点击事件
-    // homeButton.addEventListener('click', function() {
-    //     // 隐藏聊天区域，显示欢迎界面
-    //     document.querySelector('.chat-area').style.display = 'none';
-    //     document.getElementById('welcome-container').style.display = 'flex';
-        
-    //     // 清空聊天记录
-    //     document.getElementById('chat-messages').innerHTML = '';
-        
-    //     // 关闭侧边栏
-    //     document.getElementById('sidebar').classList.remove('open');
-    //     document.querySelector('.main-content').classList.remove('sidebar-open');
-        
-    //     // 重置输入框
-    //     document.querySelector('#initial-input .chat-input').value = '';
-    //     document.querySelector('.chat-input-container .input-wrapper .chat-input').value = '';
-        
-    //     // 隐藏底部输入框
-    //     document.querySelector('.chat-input-container').style.display = 'none';
-    // });
-
     // 侧边栏按钮点击事件
     document.querySelectorAll('.sidebar-action-btn').forEach(button => {
         button.addEventListener('click', () => {
