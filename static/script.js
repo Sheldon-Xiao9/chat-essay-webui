@@ -9,6 +9,7 @@ const fileUploadBottom = document.getElementById('file-upload-bottom');
 const chatInputs = document.querySelectorAll('.chat-input');
 const sendButtons = document.querySelectorAll('.send-button');
 const messagesContainer = document.getElementById('messages');
+const splitMessagesContainer = document.getElementById('split-messages');
 const welcomeContainer = document.getElementById('welcome-container');
 const chatInputContainer = document.getElementById('chat-input-container');
 const sidebarClose = document.querySelector('.sidebar-close');
@@ -142,14 +143,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 添加消息到聊天区域
     async function addMessage(content, isUser = false) {
-        if (messagesContainer.children.length === 0) {
+        // 确定当前活动的消息容器
+        const isSplitView = !document.getElementById('split-view').classList.contains('hidden');
+        const activeMessages = isSplitView ? splitMessagesContainer : messagesContainer;
+
+        // 处理界面切换
+        if (!isSplitView && messagesContainer.children.length === 0) {
             switchToChatMode();
+        } else if (isSplitView) {
+            document.getElementById('split-view').classList.remove('hidden');
+            chatInputContainer.classList.remove('hidden');
+            chatInputContainer.classList.add('visible');
+            splitMessagesContainer.classList.remove('hidden');
+            splitMessagesContainer.classList.add('visible');
         }
 
         if (!isUser) {
             // 首先添加加载动画
             const loadingMessage = createMessageElement('', false, true);
-            messagesContainer.appendChild(loadingMessage);
+            activeMessages.appendChild(loadingMessage);
             loadingMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
 
             // 模拟接收服务器响应
@@ -157,19 +169,25 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // 替换加载动画为实际消息
             const messageElement = createMessageElement(content, false);
-            messagesContainer.replaceChild(messageElement, loadingMessage);
+            activeMessages.replaceChild(messageElement, loadingMessage);
             
             // 应用打字机效果
             await typeMessage(messageElement, content);
         } else {
             const messageElement = createMessageElement(content, true);
-            messagesContainer.appendChild(messageElement);
+            activeMessages.appendChild(messageElement);
+        }
+
+        // 确保消息容器可见
+        if (isSplitView) {
+            splitMessagesContainer.style.display = 'flex';
+            splitMessagesContainer.style.flexDirection = 'column';
         }
 
         // 滚动到最新消息
-        messagesContainer.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        activeMessages.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
 
-        // 保存聊天记录（无论是用户消息还是助手消息）
+        // 保存聊天记录
         await saveCurrentChat();
     }
 
@@ -267,7 +285,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // 切换到聊天模式
-            switchToChatMode();
+            if (!chatData.file_path) {
+                switchToChatMode();
+            } else {
+                document.getElementById('split-view').classList.remove('hidden');
+                document.getElementById('pdf-viewer').innerHTML = `<iframe src="${chatData.file_path}"></iframe>`;
+            }
             
             // 清空当前消息
             messagesContainer.innerHTML = '';
@@ -418,29 +441,41 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 获取所有需要操作的元素
         const welcomeContainer = document.getElementById('welcome-container');
-        const messages = document.getElementById('messages');
-        const chatInputContainer = document.getElementById('chat-input-container');
+        const splitView = document.getElementById('split-view');
+        const pdfViewer = document.getElementById('pdf-viewer');
+        const loadingContainer = document.getElementById('loading-container');
         const chatBottom = document.querySelector('.chat-bottom');
 
         // 显示欢迎界面
         welcomeContainer.classList.remove('hidden');
-        
-        // 隐藏消息区域和底部输入框
-        messages.classList.add('hidden');
-        messages.classList.remove('visible');
-        chatInputContainer.classList.remove('visible');
-        chatInputContainer.classList.add('hidden');
-        if (chatBottom) {
-            chatBottom.style.display = 'none';
-        }
-        
-        // 清空消息区域
-        messages.innerHTML = '';
-        
+        // 清空所有消息容器
+        messagesContainer.innerHTML = '';
+        splitMessagesContainer.innerHTML = '';
+
         // 重置所有输入框的值
         const inputs = document.querySelectorAll('.chat-input');
         inputs.forEach(input => input.value = '');
-        
+
+        // 重置文件上传
+        const fileUploads = document.querySelectorAll('input[type="file"]');
+        fileUploads.forEach(input => input.value = '');
+
+        // 重置PDF查看器
+        if (pdfViewer) {
+            pdfViewer.innerHTML = '';
+        }
+
+        // 隐藏所有非欢迎界面元素
+        loadingContainer?.classList.add('hidden');
+        splitView?.classList.add('hidden');
+        chatInputContainer.classList.remove('visible');
+        chatInputContainer.classList.add('hidden');
+        messagesContainer.classList.add('hidden');
+        messagesContainer.classList.remove('visible');
+        if (chatBottom) {
+            chatBottom.style.display = 'none';
+        }
+
         // 关闭侧边栏
         sidebar.classList.remove('open');
         mainContent.classList.remove('sidebar-open');
