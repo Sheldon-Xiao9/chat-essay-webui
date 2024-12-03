@@ -275,6 +275,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 加载特定的聊天记录
     async function loadChat(chatId) {
+        resetToInitialState();
+        
         try {
             const response = await fetch(`/get_chat/${chatId}`);
             const chatData = await response.json();
@@ -287,18 +289,32 @@ document.addEventListener('DOMContentLoaded', function() {
             // 切换到聊天模式
             if (!chatData.file_path) {
                 switchToChatMode();
+                const activeMessages = document.getElementById('messages');
+                // 清空当前消息
+                activeMessages.innerHTML = '';
+                
+                // 加载消息
+                for (const msg of chatData.messages) {
+                    const messageElement = createMessageElement(msg.content, msg.role === 'user');
+                    activeMessages.appendChild(messageElement);
+                }
             } else {
+                document.getElementById('welcome-container').classList.add('hidden');
                 document.getElementById('split-view').classList.remove('hidden');
                 document.getElementById('pdf-viewer').innerHTML = `<iframe src="${chatData.file_path}"></iframe>`;
-            }
-            
-            // 清空当前消息
-            messagesContainer.innerHTML = '';
-            
-            // 加载消息
-            for (const msg of chatData.messages) {
-                const messageElement = createMessageElement(msg.content, msg.role === 'user');
-                messagesContainer.appendChild(messageElement);
+                document.getElementById('chat-input-container').classList.remove('hidden');
+                
+                const activeMessages = document.getElementById('split-messages');
+                activeMessages.classList.remove('hidden'); 
+                activeMessages.classList.add('visible'); // 添加visible类使消息可见
+                // 清空当前消息
+                activeMessages.innerHTML = '';
+                
+                // 加载消息
+                for (const msg of chatData.messages) {
+                    const messageElement = createMessageElement(msg.content, msg.role === 'user');
+                    activeMessages.appendChild(messageElement);
+                }
             }
             
             // 更新当前聊天ID

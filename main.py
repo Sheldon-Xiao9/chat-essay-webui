@@ -9,6 +9,13 @@ import uuid
 
 app = FastAPI()
 
+# 确保database目录存在
+DATABASE_DIR = "database"
+os.makedirs(DATABASE_DIR, exist_ok=True)
+
+# 挂载database目录（优先）
+app.mount("/database", StaticFiles(directory="database"), name="database")
+
 # 挂载静态文件
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -18,10 +25,6 @@ templates = Jinja2Templates(directory="templates")
 # 确保chat_history目录存在
 CHAT_HISTORY_DIR = "chat_history"
 os.makedirs(CHAT_HISTORY_DIR, exist_ok=True)
-
-# 确保database目录存在
-DATABASE_DIR = "database"
-os.makedirs(DATABASE_DIR, exist_ok=True)
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -130,7 +133,7 @@ async def upload_file(file: UploadFile = File(...)):
         # 返回文件URL
         return JSONResponse({
             "success": True,
-            "fileUrl": f"/files/{file_id}{file_extension}",
+            "fileUrl": f"/database/{file_id}{file_extension}",
             "fileName": file.filename
         })
     except Exception as e:
