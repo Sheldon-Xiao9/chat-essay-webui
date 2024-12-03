@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import FastAPI, Request, HTTPException, UploadFile, File
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import json
@@ -18,6 +18,10 @@ templates = Jinja2Templates(directory="templates")
 # 确保chat_history目录存在
 CHAT_HISTORY_DIR = "chat_history"
 os.makedirs(CHAT_HISTORY_DIR, exist_ok=True)
+
+# 确保database目录存在
+DATABASE_DIR = "database"
+os.makedirs(DATABASE_DIR, exist_ok=True)
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -109,6 +113,38 @@ async def delete_chat(chat_id: str):
         return JSONResponse({
             "error": str(e)
         })
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    try:
+        # 生成唯一的文件名
+        file_id = str(uuid.uuid4())
+        file_extension = os.path.splitext(file.filename)[1]
+        file_path = os.path.join(DATABASE_DIR, f"{file_id}{file_extension}")
+
+        # 保存文件
+        with open(file_path, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+
+        # 返回文件URL
+        return JSONResponse({
+            "success": True,
+            "fileUrl": f"/files/{file_id}{file_extension}",
+            "fileName": file.filename
+        })
+    except Exception as e:
+        return JSONResponse({
+            "success": False,
+            "error": str(e)
+        })
+
+@app.get("/files/{file_name}")
+async def get_file(file_name: str):
+    file_path = os.path.join(DATABASE_DIR, file_name)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(file_path)
 
 if __name__ == "__main__":
     import uvicorn

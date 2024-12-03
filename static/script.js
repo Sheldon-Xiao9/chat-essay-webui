@@ -42,7 +42,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // 切换输入界面
         const chatInputWrapper = document.querySelector('.chat-input-wrapper');
         
-        
         // 根据不同的按钮显示不同的输入界面
         if (index === 0 || index === 3) { // 开始聊天或推荐文献
             chatInputWrapper.classList.remove('upload-mode');
@@ -317,30 +316,65 @@ document.addEventListener('DOMContentLoaded', function() {
     async function handleFileUpload(file) {
         if (!file) return;
 
+        const loadingContainer = document.getElementById('loading-container');
+        const progressBar = loadingContainer.querySelector('.progress-bar');
+        const progressText = loadingContainer.querySelector('.progress-text');
+        const welcomeContainer = document.getElementById('welcome-container');
+        const splitView = document.getElementById('split-view');
+        const chatInputContainer = document.getElementById('chat-input-container');
+
+        // 显示loading界面
+        loadingContainer.classList.remove('hidden');
+
+        // 创建FormData对象
         const formData = new FormData();
         formData.append('file', file);
 
         try {
+            // 上传文件
             const response = await fetch('/upload', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    progressBar.style.width = `${percentCompleted}%`;
+                    progressText.textContent = `${percentCompleted}%`;
+                }
             });
 
-            if (response.ok) {
-                const result = await response.json();
-                console.log('文件上传成功:', result);
-                addMessage(`已上传文件: ${file.name}`, true);
-                // 模拟助手回复
-                setTimeout(() => {
-                    addMessage(`我已经收到文件 ${file.name}，正在分析中...`);
-                }, 1000);
-            } else {
-                console.error('文件上传失败');
-                addMessage('文件上传失败，请重试。', true);
+            if (!response.ok) {
+                throw new Error('Upload failed');
             }
+
+            const data = await response.json();
+
+            // 隐藏loading和欢迎界面
+            loadingContainer.classList.add('hidden');
+            welcomeContainer.classList.add('hidden');
+
+            // 显示分栏界面
+            splitView.classList.remove('hidden');
+            chatInputContainer.classList.remove('hidden');
+
+            // 加载PDF文件到viewer
+            const pdfViewer = document.getElementById('pdf-viewer');
+            if (file.type === 'application/pdf') {
+                const fileUrl = data.fileUrl;
+                pdfViewer.innerHTML = `<iframe src="${fileUrl}" width="100%" height="100%" frameborder="0"></iframe>`;
+            } else {
+                // 如果不是PDF，显示文件名和类型
+                pdfViewer.innerHTML = `
+                    <div class="file-info">
+                        <h3>${file.name}</h3>
+                        <p>文件类型: ${file.type}</p>
+                    </div>
+                `;
+            }
+
         } catch (error) {
-            console.error('上传过程中发生错误:', error);
-            addMessage('上传过程中发生错误，请重试。', true);
+            console.error('Error uploading file:', error);
+            loadingContainer.classList.add('hidden');
+            alert('文件上传失败，请重试');
         }
     }
 

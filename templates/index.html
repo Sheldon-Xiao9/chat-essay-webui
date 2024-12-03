@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat-Essay：你的论文处理助手</title>
     <link href="{{ url_for('static', path='styles.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', path='layout.css') }}" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 </head>
@@ -73,6 +74,15 @@
 
         <!-- 主要内容 -->
         <main class="content">
+            <div id="loading-container" class="loading-container hidden">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">正在处理文件...</div>
+                <div class="loading-progress">
+                    <div class="progress-bar"></div>
+                    <div class="progress-text">0%</div>
+                </div>
+            </div>
+
             <div class="center-container">
                 <div class="chat-area">
                     <div id="welcome-container" class="welcome-container">
@@ -110,11 +120,20 @@
                             </div>
                         </div>
                     </div>
+                    <div id="split-view" class="split-view hidden">
+                        <div class="document-view">
+                            <div id="pdf-viewer"></div>
+                        </div>
+                        <div class="chat-view">
+                            <div id="messages" class="messages"></div>
+                        </div>
+                    </div>
                     <div id="messages" class="messages hidden">
                         <!-- 消息将在这里动态添加 -->
                     </div>
                 </div>
             </div>
+            <!-- 下方聊天输入框，不要动这里的代码 -->
             <div id="chat-input-container" class="chat-input-container hidden">
                 <div class="input-wrapper">
                     <label for="file-upload-bottom" class="file-upload-btn" title="上传文件">

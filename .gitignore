@@ -163,3 +163,4 @@ cython_debug/
 
 # chat_history
 chat_history/
+database/
