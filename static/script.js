@@ -18,6 +18,7 @@ const newChatButton = document.querySelector('.new-chat-button');
 
 // 全局变量
 let currentChatId = null;
+let currentPdfPath = null; // 添加PDF路径变量
 
 document.addEventListener('DOMContentLoaded', function() {
     const navButtons = document.querySelectorAll('.nav-button-welcome');
@@ -194,7 +195,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // 保存当前聊天记录
     async function saveCurrentChat() {
         const messages = [];
-        messagesContainer.querySelectorAll('.message').forEach(msgEl => {
+
+        // 根据聊天模式选择正确的消息容器
+        const activeMessages = !document.getElementById('split-view').classList.contains('hidden') ? 
+        document.getElementById('split-messages') : 
+        document.getElementById('messages');
+
+        activeMessages.querySelectorAll('.message').forEach(msgEl => {
             messages.push({
                 role: msgEl.classList.contains('user') ? 'user' : 'assistant',
                 content: msgEl.querySelector('.message-content').textContent
@@ -215,7 +222,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({
                     chat_id: currentChatId,
                     messages: messages,
-                    title: title
+                    title: title,
+                    file_path: currentPdfPath
                 })
             });
             
@@ -400,6 +408,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (file.type === 'application/pdf') {
                 const fileUrl = data.fileUrl;
                 pdfViewer.innerHTML = `<iframe src="${fileUrl}" width="100%" height="100%" frameborder="0"></iframe>`;
+                currentPdfPath = fileUrl; // 保存PDF文件路径
+                await saveCurrentChat();
             } else {
                 // 如果不是PDF，显示文件名和类型
                 pdfViewer.innerHTML = `
@@ -409,6 +419,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
             }
+
+            addMessage('文件上传成功，您需要做什么？');
 
         } catch (error) {
             console.error('Error uploading file:', error);
@@ -479,6 +491,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 重置PDF查看器
         if (pdfViewer) {
             pdfViewer.innerHTML = '';
+            currentPdfPath = null; // 重置PDF路径
         }
 
         // 隐藏所有非欢迎界面元素

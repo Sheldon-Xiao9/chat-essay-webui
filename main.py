@@ -37,6 +37,7 @@ async def save_chat(request: Request):
         messages = data.get("messages", [])
         title = data.get("title", "新对话")
         chat_id = data.get("chat_id")
+        file_path = data.get("file_path")  # 获取file_path
 
         if not chat_id:
             chat_id = str(uuid.uuid4())
@@ -45,7 +46,8 @@ async def save_chat(request: Request):
             "id": chat_id,
             "title": title,
             "messages": messages,
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "file_path": file_path
         }
 
         # 保存聊天记录
