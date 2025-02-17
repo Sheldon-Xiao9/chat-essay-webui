@@ -327,7 +327,7 @@ body {
 }
 
 /* 按钮样式 */
-.sidebar-toggle, .theme-toggle {
+.sidebar-toggle, .theme-toggle, .settings-toggle {
     background: none;
     border: none;
     cursor: pointer;
@@ -339,19 +339,20 @@ body {
     justify-content: center;
 }
 
-.sidebar-toggle i, .theme-toggle i {
+.sidebar-toggle i, .theme-toggle i, .settings-toggle i {
     font-size: 1.5rem;
     color: var(--icon-color);
     transition: color var(--transition-speed);
 }
 
-.sidebar-toggle:hover, .theme-toggle:hover {
+.sidebar-toggle:hover, .theme-toggle:hover, .settings-toggle:hover {
     background-color: rgba(0, 0, 0, 0.1);
     transform: scale(1.05);
 }
 
 [data-theme="dark"] .sidebar-toggle:hover, 
-[data-theme="dark"] .theme-toggle:hover {
+[data-theme="dark"] .theme-toggle:hover,
+[data-theme="dark"] .settings-toggle:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 

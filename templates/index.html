@@ -65,6 +65,9 @@
                 <button id="theme-toggle" class="theme-toggle">
                     <i class="ri-sun-line" id="theme-icon"></i>
                 </button>
+                <button id="settings-toggle" class="settings-toggle">
+                    <i class="ri-settings-3-line"></i>
+                </button>
                 <div class="user-avatar">
                     <img src="{{ url_for('static', path='images/avatar.svg') }}" alt="用户头像">
                 </div>
@@ -152,5 +155,6 @@
     </div>
 
     <script src="{{ url_for('static', path='script.js') }}"></script>
+    <script src="{{ url_for('static', path='settings.js') }}"></script>
 </body>
 </html>
