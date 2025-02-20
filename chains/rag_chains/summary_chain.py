@@ -9,13 +9,38 @@ class SummaryChain:
     """摘要写作的RAG链"""
     
     def __init__(self):
-        self.model_loader = ModelLoader()
-        self.vectorizer = Vectorizer()
-        self.llm = self.model_loader.load_chat_model()
-        self.memory = ConversationBufferMemory(
-            memory_key="chat_history",
-            return_messages=True
-        )
+        self._model_loader = None
+        self._vectorizer = None
+        self._chat_model = None
+        self._memory = None
+
+    @property
+    def model_loader(self):
+        if self._model_loader is None:
+            self._model_loader = ModelLoader()
+        return self._model_loader
+
+    @property
+    def vectorizer(self):
+        if self._vectorizer is None:
+            self._vectorizer = Vectorizer()
+        return self._vectorizer
+
+    @property
+    def memory(self):
+        if self._memory is None:
+            self._memory = ConversationBufferMemory(
+                memory_key="chat_history",
+                return_messages=True
+            )
+        return self._memory
+
+    @property
+    def llm(self):
+        """获取聊天模型"""
+        if self._chat_model is None:
+            self._chat_model = self.model_loader.load_chat_model()
+        return self._chat_model
         
     def _create_prompt_template(self) -> PromptTemplate:
         """创建提示模板"""

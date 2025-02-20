@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, HTTPException, UploadFile, File
+from fastapi import FastAPI, Request, HTTPException, UploadFile, File, Depends
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -6,9 +6,24 @@ import json
 import os
 from datetime import datetime
 import uuid
-from main_routes import router
+from contextlib import asynccontextmanager
+from main_routes import router, processor_manager
 
-app = FastAPI(title="Chat-Essay Web UI")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """处理应用的生命周期"""
+    try:
+        print("服务器启动中...")
+        yield
+    finally:
+        print("正在清理资源...")
+        try:
+            processor_manager.cleanup()
+            print("资源清理完成")
+        except Exception as e:
+            print(f"清理资源时出错: {str(e)}")
+
+app = FastAPI(title="Chat-Essay Web UI", lifespan=lifespan)
 
 # 包含功能路由
 app.include_router(router)
@@ -128,7 +143,7 @@ async def upload_file(file: UploadFile = File(...)):
     try:
         # 生成唯一的文件名
         file_id = str(uuid.uuid4())
-        file_extension = os.path.splitext(file.filename)[1]
+        file_extension = os.path.splitext(file.filename)[1] if file.filename else ""
         file_path = os.path.join(DATABASE_DIR, f"{file_id}{file_extension}")
 
         # 保存文件
