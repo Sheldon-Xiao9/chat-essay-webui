@@ -6,8 +6,12 @@ import json
 import os
 from datetime import datetime
 import uuid
+from main_routes import router
 
-app = FastAPI()
+app = FastAPI(title="Chat-Essay Web UI")
+
+# 包含功能路由
+app.include_router(router)
 
 # 确保database目录存在
 DATABASE_DIR = "database"

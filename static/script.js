@@ -433,6 +433,24 @@ document.addEventListener('DOMContentLoaded', function() {
     fileUpload.addEventListener('change', (e) => handleFileUpload(e.target.files[0]));
     fileUploadBottom.addEventListener('change', (e) => handleFileUpload(e.target.files[0]));
 
+    // 获取当前选中的模式
+    function getCurrentMode() {
+        const activeButton = document.querySelector('.nav-button-welcome[data-active="true"]');
+        if (!activeButton) return 'chat';
+        
+        const buttonText = activeButton.querySelector('span').textContent;
+        switch (buttonText) {
+            case '摘要生成':
+                return 'summary';
+            case '阅读论文':
+                return 'read-paper';
+            case '推荐文献':
+                return 'recommend-papers';
+            default:
+                return 'chat';
+        }
+    }
+
     // 发送消息
     async function sendMessage(input) {
         const message = input.value.trim();
@@ -442,8 +460,45 @@ document.addEventListener('DOMContentLoaded', function() {
         await addMessage(message, true);
         input.value = '';
 
-        // 模拟助手回复
-        await addMessage('我已经收到你的问题，让我思考一下...');
+        try {
+            const currentMode = getCurrentMode();
+            let response;
+
+            // 构造请求数据
+            const requestData = {
+                content: message
+            };
+
+            // 如果是需要文件的模式且有已上传的文件路径，添加文件路径
+            if ((currentMode === 'summary' || currentMode === 'read-paper') && currentPdfPath) {
+                requestData.file_path = currentPdfPath;
+            }
+
+            // 发送请求
+            response = await fetch(`/${currentMode}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (!response.ok) {
+                throw new Error('API request failed');
+            }
+
+            const result = await response.json();
+            if (result.success) {
+                let responseMessage = result.response || result.summary || result.answer || result.recommendations;
+                await addMessage(responseMessage, false);
+            } else {
+                await addMessage('抱歉，处理您的请求时出现错误：' + (result.error || '未知错误'), false);
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            await addMessage('抱歉，发生了错误，请重试', false);
+        }
     }
 
     // 为所有输入框和发送按钮添加事件监听
