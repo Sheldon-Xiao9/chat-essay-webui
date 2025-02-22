@@ -427,20 +427,20 @@ document.addEventListener('DOMContentLoaded', function() {
             currentChatId = null;
             
             if (currentMode === 'summary') {
-    // 摘要生成模式：直接请求摘要
-    await addMessage('正在生成文档摘要...', false);
-    
-    const response = await fetch('/summary', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            file_path: currentPdfPath,
-            content: '请生成这篇文章的详细摘要。',
-            isNewUpload: true  // 标记新上传的文件
-        })
-    });
+                // 摘要生成模式：直接请求摘要
+                await addMessage('正在生成文档摘要...', false);
+                
+                const response = await fetch('/summary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file_path: currentPdfPath,
+                        content: '请生成这篇文章的详细摘要。',
+                        isNewUpload: true  // 标记新上传的文件
+                    })
+                });
                 
                 const result = await response.json();
                 if (result.success) {

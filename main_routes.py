@@ -133,15 +133,35 @@ async def read_paper(request: Request):
         if file_path and file_path.startswith("/database/"):
             # 如果提供了文件路径，结合文件内容回答问题
             real_path = os.path.join(os.getcwd(), file_path.lstrip("/"))
+            print(f"[API] Processing paper: {real_path}")
+            
+            # 读取文件内容
             paper_content = "\n".join(processor_manager.file_processor.load_document(real_path))
-            result = processor_manager.web_search_chain.process_paper(paper_content, question)
+            print("[API] Document loaded, sending to WebSearchChain")
+            
+            # 调用处理链
+            result = processor_manager.web_search_chain.process_paper(
+                file_path=real_path,
+                paper_content=paper_content,
+                question=question
+            )
         else:
-            # 如果没有文件路径，直接回答问题
-            response = processor_manager.web_search_chain.search_tool.run(question)
-            result = {
-                "success": True,
-                "answer": response
-            }
+            # 如果没有文件路径，只进行网络搜索
+            print("[API] No file provided, performing web search only")
+            try:
+                response = processor_manager.web_search_chain.search_tool.run(question)
+                result = {
+                    "success": True,
+                    "answer": response,
+                    "context": "",  # 没有文档上下文
+                    "search_results": response  # 搜索结果作为主要内容
+                }
+            except Exception as e:
+                print(f"[API] Search error: {str(e)}")
+                result = {
+                    "success": False,
+                    "error": str(e)
+                }
             
         return JSONResponse(result)
         
