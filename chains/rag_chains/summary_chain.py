@@ -1,7 +1,6 @@
 from typing import List, Dict, Any
 from langchain.prompts import PromptTemplate
-from langchain.chains import RetrievalQA
-from langchain.memory import ConversationBufferMemory
+from langchain.chains import LLMChain
 from utils.model_loader import ModelLoader
 from utils.vectorizer import Vectorizer
 
@@ -12,7 +11,6 @@ class SummaryChain:
         self._model_loader = None
         self._vectorizer = None
         self._chat_model = None
-        self._memory = None
 
     @property
     def model_loader(self):
@@ -25,15 +23,6 @@ class SummaryChain:
         if self._vectorizer is None:
             self._vectorizer = Vectorizer()
         return self._vectorizer
-
-    @property
-    def memory(self):
-        if self._memory is None:
-            self._memory = ConversationBufferMemory(
-                memory_key="chat_history",
-                return_messages=True
-            )
-        return self._memory
 
     @property
     def llm(self):
@@ -50,7 +39,7 @@ class SummaryChain:
 {context}
 
 用户请求:
-{question}
+{query}
 
 请根据文档内容和用户的具体要求，生成一个恰当的摘要。摘要应该：
 1. 符合用户的具体要求
@@ -63,48 +52,67 @@ class SummaryChain:
         
         return PromptTemplate(
             template=template,
-            input_variables=["context", "question"]
+            input_variables=["context", "query"]
         )
         
-    def create_retrieval_chain(self, vector_store):
-        """创建检索链"""
+    def create_chain(self, vector_store):
+        """创建生成摘要的LLM链"""
+        print("[SummaryChain] Creating chain...")
         prompt = self._create_prompt_template()
-        
-        chain = RetrievalQA.from_chain_type(
-            llm=self.llm,
-            chain_type="stuff",
-            retriever=vector_store.as_retriever(
-                search_kwargs={"k": 3}
-            ),
-            chain_type_kwargs={
-                "prompt": prompt,
-                "memory": self.memory,
-            },
-            return_source_documents=True,
-        )
-        
-        return chain
+        chain = LLMChain(llm=self.llm, prompt=prompt)
+        print("[SummaryChain] Chain created")
+        return chain, vector_store
     
     def process_file(self, file_path: str, query: str) -> Dict[str, Any]:
         """处理文件并生成摘要"""
         try:
+            print("\n[SummaryChain] Processing file:", file_path)
+            print("[SummaryChain] Query:", query)
+            
             # 向量化处理文件
             store_name = f"summary_{hash(file_path)}"
+            print("[SummaryChain] Vectorizing document...")
             vector_store = self.vectorizer.process_file(file_path, store_name)
+            print("[SummaryChain] Vectorization completed")
             
-            # 创建检索链
-            chain = self.create_retrieval_chain(vector_store)
+            # 创建链
+            print("[SummaryChain] Setting up chain...")
+            chain, vector_store = self.create_chain(vector_store)
             
-            # 执行检索和生成
-            result = chain({"query": query})
+            # 检索相关内容
+            print("[SummaryChain] Retrieving relevant documents...")
+            docs = vector_store.similarity_search(query, k=3)
+            context = "\n\n".join([doc.page_content for doc in docs])
+            print("[SummaryChain] Retrieved context length:", len(context))
             
-            return {
-                "success": True,
-                "summary": result["result"],
-                "sources": [doc.page_content for doc in result["source_documents"]]
-            }
+            # 执行生成
+            print("[SummaryChain] Running chain...")
+            print("[SummaryChain] Input parameters:")
+            print(f"- context length: {len(context)}")
+            print(f"- query: {query}")
+            
+            try:
+                inputs = {
+                    "context": context,
+                    "query": query
+                }
+                print("[SummaryChain] Calling chain.predict with:", inputs.keys())
+                
+                result = chain.predict(**inputs)
+                print("[SummaryChain] Chain completed successfully")
+                print("[SummaryChain] Result type:", type(result))
+                print("[SummaryChain] Result length:", len(str(result)))
+                
+                return {
+                    "success": True,
+                    "summary": result
+                }
+            except Exception as e:
+                print("[SummaryChain] Error during prediction:", str(e))
+                raise
             
         except Exception as e:
+            print("[SummaryChain] Error:", str(e))
             return {
                 "success": False,
                 "error": str(e)

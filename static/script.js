@@ -420,7 +420,42 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
             }
 
-            addMessage('文件上传成功，您需要做什么？');
+            // 获取当前模式
+            const currentMode = getCurrentMode();
+            
+            // 重置对话ID并发送系统消息
+            currentChatId = null;
+            
+            if (currentMode === 'summary') {
+                // 摘要生成模式：直接请求摘要
+                await addMessage('正在生成文档摘要...', false);
+                
+                const response = await fetch('/summary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file_path: currentPdfPath,
+                        content: '请生成这篇文章的详细摘要。'
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    await addMessage(result.summary, false);
+                } else {
+                    await addMessage('抱歉，处理您的请求时出现错误：' + (result.error || '未知错误'), false);
+                }
+            } else if (currentMode === 'read-paper') {
+                // 阅读论文模式：等待用户具体问题
+                await addMessage('文件上传成功，请问您想了解这篇论文的哪些内容？', false);
+            } else {
+                // 其他模式：默认消息
+                await addMessage('文件上传成功，您需要做什么？', false);
+            }
+            
+            await saveCurrentChat();
 
         } catch (error) {
             console.error('Error uploading file:', error);
