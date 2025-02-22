@@ -76,6 +76,10 @@ def get_model_loader() -> Optional[ModelLoader]:
     """获取ModelLoader实例，用于清理资源"""
     return processor_manager.model_loader
 
+def get_summary_chain() -> Optional[SummaryChain]:
+    """获取SummaryChain实例"""
+    return processor_manager.summary_chain
+
 # 确保database目录存在
 DATABASE_DIR = "database"
 os.makedirs(DATABASE_DIR, exist_ok=True)
@@ -91,7 +95,17 @@ async def generate_summary(request: Request):
         if file_path and file_path.startswith("/database/"):
             # 如果提供了文件路径，处理文件摘要
             real_path = os.path.join(os.getcwd(), file_path.lstrip("/"))
-            result = processor_manager.summary_chain.process_file(real_path, query)
+            
+            # 获取或创建chain实例
+            chain = processor_manager.summary_chain
+            
+            # 处理文件
+            if data.get("isNewUpload"):
+                print("[API] New file uploaded, clearing cache...")
+                chain.clear_cache(real_path)
+                
+            # 生成摘要    
+            result = chain.process_file(real_path, query)
         else:
             # 如果没有文件路径，直接处理文本查询
             response = processor_manager.summary_chain.llm(query)

@@ -427,19 +427,20 @@ document.addEventListener('DOMContentLoaded', function() {
             currentChatId = null;
             
             if (currentMode === 'summary') {
-                // 摘要生成模式：直接请求摘要
-                await addMessage('正在生成文档摘要...', false);
-                
-                const response = await fetch('/summary', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        file_path: currentPdfPath,
-                        content: '请生成这篇文章的详细摘要。'
-                    })
-                });
+    // 摘要生成模式：直接请求摘要
+    await addMessage('正在生成文档摘要...', false);
+    
+    const response = await fetch('/summary', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            file_path: currentPdfPath,
+            content: '请生成这篇文章的详细摘要。',
+            isNewUpload: true  // 标记新上传的文件
+        })
+    });
                 
                 const result = await response.json();
                 if (result.success) {
@@ -499,15 +500,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const currentMode = getCurrentMode();
             let response;
 
-            // 构造请求数据
-            const requestData = {
-                content: message
-            };
+        // 构造请求数据
+        const requestData = {
+            content: message,
+            isNewUpload: false  // 标记这不是新上传
+        };
 
-            // 如果是需要文件的模式且有已上传的文件路径，添加文件路径
-            if ((currentMode === 'summary' || currentMode === 'read-paper') && currentPdfPath) {
-                requestData.file_path = currentPdfPath;
-            }
+        // 如果是需要文件的模式且有已上传的文件路径，添加文件路径
+        if ((currentMode === 'summary' || currentMode === 'read-paper') && currentPdfPath) {
+            requestData.file_path = currentPdfPath;
+        }
 
             // 发送请求
             response = await fetch(`/${currentMode}`, {

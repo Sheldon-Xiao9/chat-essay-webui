@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from utils.model_loader import ModelLoader
@@ -11,7 +11,20 @@ class SummaryChain:
         self._model_loader = None
         self._vectorizer = None
         self._chat_model = None
+        self._vector_store_cache = {}  # 缓存vector store
 
+    def clear_cache(self, file_path: Optional[str] = None):
+        """清理缓存
+        如果指定file_path，只清理该文件的缓存
+        否则清理所有缓存
+        """
+        if file_path is None:
+            print("[SummaryChain] Clearing all caches")
+            self._vector_store_cache.clear()
+        elif file_path in self._vector_store_cache:
+            print(f"[SummaryChain] Clearing cache for {file_path}")
+            del self._vector_store_cache[file_path]
+        
     @property
     def model_loader(self):
         if self._model_loader is None:
@@ -54,6 +67,30 @@ class SummaryChain:
             template=template,
             input_variables=["context", "query"]
         )
+
+    def get_or_create_vector_store(self, file_path: str) -> Any:
+        """获取或创建向量存储"""
+        store_name = f"summary_{hash(file_path)}"
+        
+        # 先检查内存缓存
+        if file_path in self._vector_store_cache:
+            print("[SummaryChain] Using cached vector store")
+            return self._vector_store_cache[file_path]
+            
+        # 再检查磁盘缓存
+        vector_store = self.vectorizer.load_vector_store(store_name)
+        if vector_store is not None:
+            print("[SummaryChain] Loaded vector store from disk")
+            self._vector_store_cache[file_path] = vector_store
+            return vector_store
+            
+        # 都没有则创建新的
+        print("[SummaryChain] Creating new vector store")
+        # 清理旧的缓存和文件
+        self.clear_cache(file_path)
+        vector_store = self.vectorizer.process_file(file_path, store_name)
+        self._vector_store_cache[file_path] = vector_store
+        return vector_store
         
     def create_chain(self, vector_store):
         """创建生成摘要的LLM链"""
@@ -69,11 +106,8 @@ class SummaryChain:
             print("\n[SummaryChain] Processing file:", file_path)
             print("[SummaryChain] Query:", query)
             
-            # 向量化处理文件
-            store_name = f"summary_{hash(file_path)}"
-            print("[SummaryChain] Vectorizing document...")
-            vector_store = self.vectorizer.process_file(file_path, store_name)
-            print("[SummaryChain] Vectorization completed")
+            # 获取或创建向量存储
+            vector_store = self.get_or_create_vector_store(file_path)
             
             # 创建链
             print("[SummaryChain] Setting up chain...")
@@ -96,7 +130,7 @@ class SummaryChain:
                     "context": context,
                     "query": query
                 }
-                print("[SummaryChain] Calling chain.predict with:", inputs.keys())
+                print("[SummaryChain] Calling chain.predict with:", inputs)
                 
                 result = chain.predict(**inputs)
                 print("[SummaryChain] Chain completed successfully")
