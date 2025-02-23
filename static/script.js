@@ -168,21 +168,16 @@ document.addEventListener('DOMContentLoaded', function() {
         // 检查是否包含思考内容
         const parts = text.split('</think>');
         if (parts.length > 1) {
-            // 有思考内容，直接显示
-            const thinkContent = parts[0].replace(/<think>/g, '');
-            const mainContent = parts[1].trim();
+            // 有思考内容
+            const mainContentDiv = contentDiv.querySelector('.main-bubble');
+            const thinkingBubble = contentDiv.querySelector('.thinking-bubble');
             
-            // 创建思考气泡
-            const thinkingBubble = document.createElement('div');
-            thinkingBubble.className = 'thinking-bubble';
-            thinkingBubble.textContent = thinkContent.trim();
-            contentDiv.appendChild(thinkingBubble);
+            if (!mainContentDiv || !thinkingBubble) {
+                console.error('Expected message structure not found');
+                return;
+            }
 
-            // 创建主要内容容器
-            const mainContentDiv = document.createElement('div');
-            mainContentDiv.className = 'main-bubble';
-            contentDiv.appendChild(mainContentDiv);
-
+            const mainContent = parts[1].trim();
             // 添加打字效果的类名
             contentDiv.classList.add('typing');
             
@@ -320,8 +315,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const messageElement = createMessageElement(content, false);
             activeMessages.replaceChild(messageElement, loadingMessage);
             
-            // 应用打字机效果
-            await typeMessage(messageElement, content);
+            // 只在新消息时应用打字机效果
+            if (!currentChatId || activeMessages.lastElementChild === messageElement) {
+                await typeMessage(messageElement, content);
+            }
         } else {
             const messageElement = createMessageElement(content, true);
             activeMessages.appendChild(messageElement);
