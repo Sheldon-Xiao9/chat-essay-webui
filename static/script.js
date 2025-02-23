@@ -121,26 +121,174 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
         } else {
-            contentDiv.textContent = content;
+            if (isUser) {
+                contentDiv.textContent = content;
+            } else {
+                // 检查是否包含思考内容
+                const parts = content.split('</think>');
+                if (parts.length > 1) {
+                    // 有思考内容
+                    const thinkContent = parts[0].replace(/<think>/g, '').trim();
+                    const mainContent = parts[1].trim();
+                    
+                    // 创建思考气泡和主要内容容器
+                    const thinkingBubble = document.createElement('div');
+                    thinkingBubble.className = 'thinking-bubble';
+                    thinkingBubble.textContent = thinkContent;
+                    
+                    const mainContentDiv = document.createElement('div');
+                    mainContentDiv.className = 'main-bubble';
+                    mainContentDiv.innerHTML = marked.parse(mainContent);
+                    
+                    contentDiv.appendChild(thinkingBubble);
+                    contentDiv.appendChild(mainContentDiv);
+                } else {
+                    // 没有思考内容
+                    const mainContentDiv = document.createElement('div');
+                    mainContentDiv.className = 'main-bubble';
+                    mainContentDiv.innerHTML = marked.parse(content);
+                    contentDiv.appendChild(mainContentDiv);
+                }
+                
+                // 代码高亮
+                contentDiv.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            }
         }
         
         messageDiv.appendChild(contentDiv);
         return messageDiv;
     }
 
-    // 模拟打字效果
+    // 逐字打字效果（支持HTML内容）
     async function typeMessage(element, text, delay = 50) {
         const contentDiv = element.querySelector('.message-content');
-        contentDiv.textContent = '';
-        contentDiv.classList.add('typing');
         
-        for (let char of text) {
-            contentDiv.textContent += char;
+        // 检查是否包含思考内容
+        const parts = text.split('</think>');
+        if (parts.length > 1) {
+            // 有思考内容，直接显示
+            const thinkContent = parts[0].replace(/<think>/g, '');
+            const mainContent = parts[1].trim();
+            
+            // 创建思考气泡
+            const thinkingBubble = document.createElement('div');
+            thinkingBubble.className = 'thinking-bubble';
+            thinkingBubble.textContent = thinkContent.trim();
+            contentDiv.appendChild(thinkingBubble);
+
+            // 创建主要内容容器
+            const mainContentDiv = document.createElement('div');
+            mainContentDiv.className = 'main-bubble';
+            contentDiv.appendChild(mainContentDiv);
+
+            // 添加打字效果的类名
+            contentDiv.classList.add('typing');
+            
+            // 准备主要内容
+            const renderedContent = marked.parse(mainContent);
+            const tempDiv = document.createElement('div');
+            tempDiv.style.display = 'none';
+            tempDiv.innerHTML = renderedContent;
+            document.body.appendChild(tempDiv);
+            const textContent = tempDiv.textContent;
+            document.body.removeChild(tempDiv);
+            
+            // 逐字显示主要内容
+            for (let i = 0; i < textContent.length; i++) {
+                // 计算当前位置前的完整单词
+                let currentPos = i + 1;
+                while (currentPos < textContent.length && 
+                       /[a-zA-Z0-9]/.test(textContent[currentPos]) && 
+                       /[a-zA-Z0-9]/.test(textContent[currentPos - 1])) {
+                    currentPos++;
+                    i++;
+                }
+                
+                // 重新渲染内容
+                mainContentDiv.innerHTML = marked.parse(mainContent.substring(0, currentPos));
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+            
+            // 移除打字效果类名并最终渲染
+            contentDiv.classList.remove('typing');
             await new Promise(resolve => setTimeout(resolve, delay));
+            mainContentDiv.innerHTML = renderedContent;
+            
+            // 代码高亮
+            contentDiv.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+        } else {
+            // 没有思考内容
+            // 创建主要内容容器
+            const mainContentDiv = document.createElement('div');
+            mainContentDiv.className = 'main-bubble';
+            contentDiv.appendChild(mainContentDiv);
+            
+            // 添加打字效果的类名
+            contentDiv.classList.add('typing');
+
+            // 准备主要内容
+            const renderedContent = marked.parse(text);
+            const tempDiv = document.createElement('div');
+            tempDiv.style.display = 'none';
+            tempDiv.innerHTML = renderedContent;
+            document.body.appendChild(tempDiv);
+            const textContent = tempDiv.textContent;
+            document.body.removeChild(tempDiv);
+
+            // 逐字显示
+            for (let i = 0; i < textContent.length; i++) {
+                // 计算当前位置前的完整单词
+                let currentPos = i + 1;
+                while (currentPos < textContent.length && 
+                       /[a-zA-Z0-9]/.test(textContent[currentPos]) && 
+                       /[a-zA-Z0-9]/.test(textContent[currentPos - 1])) {
+                    currentPos++;
+                    i++;
+                }
+                
+                // 重新渲染内容
+                mainContentDiv.innerHTML = marked.parse(text.substring(0, currentPos));
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+            
+            // 移除打字效果类名并最终渲染
+            contentDiv.classList.remove('typing');
+            await new Promise(resolve => setTimeout(resolve, delay));
+            mainContentDiv.innerHTML = renderedContent;
+            
+            // 代码高亮
+            contentDiv.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
         }
-        
-        contentDiv.classList.remove('typing');
     }
+
+    // 获取消息内容，保持思考标签格式
+    function getMessageContent(messageElement) {
+        const messageContent = messageElement.querySelector('.message-content');
+        const thinkingBubble = messageContent.querySelector('.thinking-bubble');
+        const mainBubble = messageContent.querySelector('.main-bubble');
+        
+        if (thinkingBubble && mainBubble) {
+            return `<think>${thinkingBubble.textContent}</think>${mainBubble.textContent}`;
+        }
+        return messageContent.textContent;
+    }
+
+    // 配置marked选项
+    marked.setOptions({
+        highlight: function(code, language) {
+            if (language && hljs.getLanguage(language)) {
+                return hljs.highlight(code, { language }).value;
+            }
+            return code;
+        },
+        breaks: true
+    });
 
     // 添加消息到聊天区域
     async function addMessage(content, isUser = false) {
@@ -204,7 +352,9 @@ document.addEventListener('DOMContentLoaded', function() {
         activeMessages.querySelectorAll('.message').forEach(msgEl => {
             messages.push({
                 role: msgEl.classList.contains('user') ? 'user' : 'assistant',
-                content: msgEl.querySelector('.message-content').textContent
+                content: msgEl.classList.contains('user') ? 
+                    msgEl.querySelector('.message-content').textContent :
+                    getMessageContent(msgEl)
             });
         });
         
