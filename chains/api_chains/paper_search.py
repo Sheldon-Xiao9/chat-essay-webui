@@ -13,12 +13,13 @@ class PaperSearchChain:
         self.llm = self.model_loader.load_chat_model()
         self.crossref_api = "https://api.crossref.org/works"
         self.headers = {
-            "User-Agent": "ChatEssayWebUI/1.0 (mailto:your-email@domain.com)"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
         }
         
     def _create_search_prompt(self) -> PromptTemplate:
         """创建搜索提示模板"""
-        template = """基于用户的研究问题，生成精确的学术搜索查询。
+        template = """
+你是Chat-Essay，一个专业的人工智能论文处理助手。请基于用户的研究问题，生成精确的学术搜索查询。
 
 研究问题:
 {question}
@@ -38,7 +39,8 @@ class PaperSearchChain:
         
     def _create_filter_prompt(self) -> PromptTemplate:
         """创建过滤提示模板"""
-        template = """基于用户的研究问题和检索到的论文列表，筛选最相关的论文。
+        template = """
+你是Chat-Essay，一个专业的人工智能论文处理助手。请基于用户的研究问题和检索到的论文列表，筛选最相关的论文。
 
 研究问题:
 {question}

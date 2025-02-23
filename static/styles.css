@@ -91,6 +91,7 @@ body {
     background-color: var(--header-bg);
     border-bottom: 1px solid var(--border-color);
     height: 64px;
+    position: fixed;
 }
 
 /* 侧边栏头部 */
@@ -974,6 +975,7 @@ body {
 }
 
 .message-content .main-bubble {
+    margin-top: 0.5em;
     width: 100%;
     min-height: 1.2em;
     opacity: 1;
