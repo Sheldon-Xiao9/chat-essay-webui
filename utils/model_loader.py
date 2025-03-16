@@ -2,7 +2,7 @@ import os
 import torch
 from langchain_community.llms import HuggingFacePipeline
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline # type: ignore
 
 class ModelLoader:
     def __init__(self):
@@ -67,7 +67,7 @@ class ModelLoader:
                 return_full_text=False,  # 只返回新生成的文本
                 do_sample=True,  # 使用采样
                 max_new_tokens=2048,
-                temperature=0.7,
+                temperature=0.3,
                 top_p=0.95,
                 top_k=50,
                 repetition_penalty=1.1,
