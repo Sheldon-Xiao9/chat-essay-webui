@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "3791:3791"
+    volumes:
+      - ./database:/app/database
+      - ./chat_history:/app/chat_history
+      - ./models:/app/models
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3791
+      - NVIDIA_VISIBLE_DEVICES=all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all 
+              capabilities: [gpu]
+    restart: unless-stopped
