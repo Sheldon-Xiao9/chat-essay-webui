@@ -19,8 +19,17 @@ const newChatButton = document.querySelector('.new-chat-button');
 // 全局变量
 let currentChatId = null;
 let currentPdfPath = null; // 添加PDF路径变量
+let loadingMessage = null;
 
 document.addEventListener('DOMContentLoaded', function() {
+    // 确保highlight.js加载完成
+    if (typeof hljs === 'undefined') {
+        console.warn("highlight.js尚未加载，正在尝试加载...");
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/highlight.min.js";
+        document.head.appendChild(script);
+    }
+
     const navButtons = document.querySelectorAll('.nav-button-welcome');
     const navSlider = document.querySelector('.nav-slider');
 
@@ -303,14 +312,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (!isUser) {
-            // 首先添加加载动画
-            const loadingMessage = createMessageElement('', false, true);
-            activeMessages.appendChild(loadingMessage);
-            loadingMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
-
-            // 模拟接收服务器响应
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
             // 替换加载动画为实际消息
             const messageElement = createMessageElement(content, false);
             activeMessages.replaceChild(messageElement, loadingMessage);
@@ -322,6 +323,15 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             const messageElement = createMessageElement(content, true);
             activeMessages.appendChild(messageElement);
+
+            // 一秒延迟
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // 立刻添加加载动画
+            loadingMessage = createMessageElement('', false, true);
+            activeMessages.appendChild(loadingMessage);
+
+            loadingMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
 
         // 确保消息容器可见
