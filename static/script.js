@@ -226,10 +226,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         } else {
             // 没有思考内容
-            // 创建主要内容容器
-            const mainContentDiv = document.createElement('div');
-            mainContentDiv.className = 'main-bubble';
-            contentDiv.appendChild(mainContentDiv);
+            let mainContentDiv = contentDiv.querySelector('.main-bubble');
+        
+            // 如果不存在，才创建新的（这应该不会发生，但以防万一）
+            if (!mainContentDiv) {
+                mainContentDiv = document.createElement('div');
+                mainContentDiv.className = 'main-bubble';
+                contentDiv.appendChild(mainContentDiv);
+            }
             
             // 添加打字效果的类名
             contentDiv.classList.add('typing');
@@ -314,7 +318,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isUser) {
             // 替换加载动画为实际消息
             const messageElement = createMessageElement(content, false);
-            activeMessages.replaceChild(messageElement, loadingMessage);
+            // 检查loadingMessage是否存在
+            if (loadingMessage && loadingMessage.parentNode === activeMessages) {
+                // 如果存在，替换它
+                activeMessages.replaceChild(messageElement, loadingMessage);
+            } else {
+                // 如果不存在，直接添加新消息
+                activeMessages.appendChild(messageElement);
+            }
             
             // 只在新消息时应用打字机效果
             if (!currentChatId || activeMessages.lastElementChild === messageElement) {
