@@ -1,6 +1,6 @@
 # Chat-Essay-WebUI: 你的论文处理助手 🎓
 
-一个基于 FastAPI 和 LangChain 构建的智能论文处理助手，帮助你更好地阅读、理解和分析学术论文。
+Chat-Essay-WebUI 是一个基于大模型的论文处理和交互式对话系统，旨在提供更优质的网页端用户体验。本项目是 Chat-Essay 的 Web 界面实现，不包含模型训练和数据处理部分。
 
 ## 功能特点 ✨
 
@@ -32,11 +32,25 @@
 ## 快速开始 🚀
 
 ### 环境要求
+
+#### Python安装要求
 - Python 3.11+
 - pip（Python 包管理器）
 - 8GB+ RAM（推荐）
 
+#### Docker 安装要求
+- Docker 与 Docker Compose
+- NVIDIA GPU 支持（可选）：
+  - NVIDIA 显卡驱动
+  - NVIDIA Container Toolkit（用于GPU支持）
+- 8GB+ RAM（推荐）
+
 ### 安装步骤
+
+您可以选择传统方式安装或使用Docker安装：
+
+#### 方式一：Python 安装
+
 
 1. 克隆仓库
 ```bash
@@ -71,6 +85,39 @@ python main.py
 6. 访问应用
 打开浏览器，访问 http://localhost:3791
 
+#### 方式二：Docker 安装
+
+1. 克隆仓库
+```bash
+git clone [repository-url]
+cd chat-essay-webui
+```
+
+2. 创建必要的目录
+```bash
+mkdir -p database chat_history models/chat models/embedded
+```
+
+3. 下载模型文件并放入相应目录
+- 用于用户交互的模型文件放在 `models/chat` 目录下
+- 用于向量化处理的模型文件放在 `models/embedded` 目录下
+
+4. 使用 Docker Compose 启动服务
+
+使用 GPU 版本（需要 NVIDIA Container Toolkit）：
+```bash
+# 直接使用默认配置运行：
+docker compose up --build
+```
+
+5. 访问应用
+打开浏览器，访问 http://localhost:3791
+
+注意事项：
+- 首次构建可能需要一些时间来下载基础镜像和安装依赖
+- 所有数据（数据库、聊天历史、模型）都通过 volumes 持久化存储
+- 可以根据需要修改 docker-compose.yml 中的端口映射
+
 ## 项目结构 📁
 
 ```
@@ -78,6 +125,9 @@ chat-essay-webui/
 ├── main.py              # FastAPI 应用主文件
 ├── main_routes.py       # API 路由和处理器
 ├── requirements.txt     # Python 依赖列表
+├── Dockerfile          # Docker 构建文件
+├── docker-compose.yml  # Docker Compose 配置文件
+├── .dockerignore      # Docker 构建忽略文件
 ├── chains/             # LangChain 处理链
 │   ├── api_chains/     # API 相关处理链
 │   │   ├── paper_search.py    # 论文搜索链

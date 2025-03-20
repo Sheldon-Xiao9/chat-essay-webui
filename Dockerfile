@@ -4,7 +4,7 @@ FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
 RUN apt-get update && apt-get install -y \
     python3.11 \
     python3-pip \
-    python3.11-dev \
+    python3.11-dev
 WORKDIR /app
 
 # Install system dependencies
